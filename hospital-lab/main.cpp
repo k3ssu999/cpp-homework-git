@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <windows.h>
 enum class Department {
 Therapy,// Терапия
 Surgery,// Хирургия
@@ -29,66 +30,71 @@ std::string stateToString(PatientState s){
         case PatientState::InQueue:        return "В очереди";
         case PatientState::InTreatment:    return "Лечится";
         case PatientState::Discharged:     return "Выписан";
+        default:                           return "Неизвестно";
         
     }
 }
 
 class Patient {
 private:
-std::string name;
-int age;
-Department department;
-PatientState state;
+    std::string name;
+    int age;
+    Department department;
+    PatientState state;
+
 public:
-Patient(std::string name, int age, Department dept)
-    :name(std::move(name)), age(age), department(dept), state(PatientState::InQueue){
+    Patient(std::string name, int age, Department dept)
+        : name(std::move(name)), age(age), department(dept), state(PatientState::InQueue) {}
 
-}
-// Геттеры
-std::string getName() const{return name;}
-int getAge() const{return age;}
-Department getDepartment() const{return department;}
-PatientState getState() const{return state;}
-// Сеттеры
-void setAge(int newAge){
-    if (newAge > 0){
-        age = newAge;
+    std::string getName() const { return name; }
+    int getAge() const { return age; }
+    Department getDepartment() const { return department; }
+    PatientState getState() const { return state; }
+
+    void setAge(int newAge) {
+        if (newAge > 0) {
+            age = newAge;
+        } else {
+            std::cerr << "Ошибка возраста" << std::endl;
+        }
     }
-    else{
-        std::cout<<"Ошибка возраста"<< std::endl;
+
+    void setState(PatientState s) {
+        state = s;
     }
-}
-void setState(PatientState s){
-    state = s;
-};
-// Виртуальная функция
-virtual std::string getDescription() const{
-    return "Пациент:" + name + ", возраст:" + std::to_string(age) +
-    ", отделение:" + departmentToString(department) + ", состояние" + stateToString(state);
 
-}
+    virtual std::string getDescription() const {
+        return "Пациент: " + name + 
+               ", возраст: " + std::to_string(age) + 
+               ", отделение: " + departmentToString(department) + 
+               ", состояние: " + stateToString(state);
+    }
 
-virtual ~Patient() = default;
-};
-
-
-
+    virtual ~Patient() = default;
+}; 
 
 class ChildPatient : public Patient {
 private:
-std::string parentName;
-public:
-ChildPatient(std::string name, int age, Department dept, std::string
-parentName) : Patient(std::move(name), age, dept), parentName(std::move(parentName)){}
-std::string getDescription() const override{
-    return "Ребенок:" + getName() + ", возраст" + std::to_string(getAge()) + ", отделение:" + departmentToString(getDepartment())+
-    ", состояние:" + stateToString(getState()); 
-}
-};
+    std::string parentName;
 
-main(){
-    Patient adult("Иван Петров", 35,Department::Surgery);
-    ChildPatient child("Маша Иванова", 8, Department::Therapy,"Ольга Иванова");
+public:
+    ChildPatient(std::string name, int age, Department dept, std::string parentName)
+        : Patient(std::move(name), age, dept), parentName(std::move(parentName)) {}
+
+    std::string getDescription() const override {
+        return "Ребёнок: " + getName() + 
+               ", возраст: " + std::to_string(getAge()) + 
+               ", отделение: " + departmentToString(getDepartment()) + 
+               ", состояние: " + stateToString(getState()) + 
+               ", родитель: " + parentName;
+    }
+}; 
+
+int main() {
+    SetConsoleCP(65001);       
+    SetConsoleOutputCP(65001);
+    Patient adult("Иван Петров", 35, Department::Surgery);
+    ChildPatient child("Маша Иванова", 8, Department::Therapy, "Ольга Иванова");
 
     std::cout << adult.getDescription() << std::endl;
     std::cout << child.getDescription() << std::endl;
@@ -96,4 +102,6 @@ main(){
     adult.setState(PatientState::InTreatment);
 
     std::cout << adult.getDescription() << std::endl;
+
+    return 0;
 }
